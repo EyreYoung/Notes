@@ -154,6 +154,7 @@ public interface Lock {
 - 发生异常时，`Synchronized`会自动释放线程占用的锁。`Lock`假如没有使用 `unlock()` 的话会造成死锁
 - `Synchronized`不能响应中断，因此会一直等待。`Lock`可以响应中断状态
 - `Lock` 可以知道是否成功获取锁，`Synchronized`不能
+- `Synchronized`是非公平锁，无法实现公平锁。`ReentrantLock`两个都可以实现
 
 ### `volatile` ？
 
@@ -175,6 +176,26 @@ public interface Lock {
 - 静态变量声明时要加`static`
 - 静态变量是类的属性，也叫类变量，只要字节码文件被加载，就会被分配空间。可以直接通过类名使用
 - 实例变量是对象的属性，必须创建了实例对象，其中的变量才会被分配空间。必须创建对象后通过对象来引用
+
+## 锁
+
+https://zhuanlan.zhihu.com/p/84109815
+
+### CAS？
+
+- CompareAndSwap。内存地址v，旧的预期值A，更新目标值B
+- 乐观锁的一种。拿数据时认为别人不会修改。更新数据的时候判断是否被修改过。
+- 多个线程更新同一个变量时，一个会成功，其他不成功并重试
+- 循环时间长，失败不断重试，给CPU带来压力
+- 只能保证一个共享变量的原子操作
+- ABA问题。修改为B后又修改为A，无法判断中间发生过修改
+
+### Atomic
+
+- 轻量级地保证变量原子性
+- 通过无锁化的CAS实现
+
+
 
 ## 面向对象
 
@@ -218,6 +239,24 @@ Key唯一；Value可以重复；允许`null`键`null`值
 ### Hashtable？
 
 - 线程安全的遗留类，类似HashMap
+- Hashtable与HashMap的相同点
+  - Hashtable和HashMap相同都是基于哈希表实现的，同样每个元素都是一个key-value对，内部也是通过单链表来解决冲突问题，容量不足时，同样会自动增长。
+  -  Hashtable同样实现了Serializable接口，它支持序列化，实现Cloneable接口，能被克隆，实现了Map接口。
+- Hashtable与HashMap的不同点
+  - 继承父类不同：Hashtable继承自Dictionary类，而HashMap继承自AbstractMap类。
+  - 线程安全不同：Hashtable中的方法是Synchronize的，而HashMap中的方法在缺省的情况下是非Synchronize的，在多线程的环境下，可以直接使用Hashtable
+  - 是否提供contains方法：HashMap把Hashtable中的contains方法去掉了，改成了containsValue和containsKey，因为contains方法容易引起误解。
+  - key和value是否允许null值：Hashtable中，key和value都不允许null值，而HashMap则都允许。
+    遍历方式不同：都使用Iterator，但Hashtable还是用了Enumeration的方式。
+  - hash不同：Hashtable使用了对象的hashCode，而HashMap重新计算了hash值。
+    内部实现使用的数组初始化和扩容方式不同：Hashtable默认容量为11，而HashMap为16，Hashtable扩容是，变为原来的两倍加1，HashMap变为两倍。
+
+### LinkedHashMap？
+
+- LinkedHashMap是HashMap类的一个子类，它拥有HashMap的一切特性，HashMap中的元素是无序存储的，而LinkedHashMap使用双向链表来保证它的迭代顺序。可以说LinkedHashMap=HashMap+LinkedList。除了维护一个Entry数组，还定义了双向链表的头尾节点来保证迭代顺序，在Entry类中还新增了每个节点的前后节点（before，after）。
+-  LinkedHashMap支持两种顺序：插入顺序和访问顺序
+        1.插入顺序：先添加的在前面，后添加的在后面，修改操作不印象顺序。
+        2.访问顺序：访问指的是get/put，对一个键执行get/put操作后，其对应的键值对会移到链表的末尾，所以最末尾的时最近访问的，最开始的是最久没有被访问的，这就是访问顺序。
 
 ### TreeMap？
 
@@ -233,14 +272,274 @@ Key唯一；Value可以重复；允许`null`键`null`值
 
 ### ConcurrentHashMap?
 
-线程安全的HashMap
+- 线程安全的HashMap
+- 基于数组加链表/红黑树实现
+- CAS+synchronized保证并发性（不再使用segment）
+- 不允许null值null键
+- 插入：
+  - 判断Node数组是否初始化，没有则进行初始化
+  - 通过hash定位数组的索引坐标，判断是否有Node节点，没有则使用CAS添加。失败则重试
+  - 如果内部正在扩容，则帮助一起扩容
+  - 如果有node节点，用synchronized锁住头元素。如果是链表节点，执行链表添加操作，红黑树则执行红黑树插入操作。
+
+## JVM
+
+### JVM调优
+
+如果CPU使用率较高，GC频繁且GC时间长，可能就需要JVM调优了。
+ 基本思路就是让每一次GC都回收尽可能多的对象，
+ 对于CMS来说，要合理设置年轻代和年老代的大小。该如何确定它们的大小呢？这是一个迭代的过程，可以先采用JVM的默认值，然后通过压测分析GC日志。
+
+如果看年轻代的内存使用率处在高位，导致频繁的Minor GC，而频繁GC的效率又不高，说明对象没那么快能被回收，这时年轻代可以适当调大一点。
+
+如果看年老代的内存使用率处在高位，导致频繁的Full GC，这样分两种情况：如果每次Full GC后年老代的内存占用率没有下来，可以怀疑是内存泄漏；如果Full GC后年老代的内存占用率下来了，说明不是内存泄漏，要考虑调大年老代。
+
+对于G1收集器来说，可以适当调大Java堆，因为G1收集器采用了局部区域收集策略，单次垃圾收集的时间可控，可以管理较大的Java堆。
+
+## GC
+
+### GC算法
+
+- 引用计数法。对于对象A，任何对象引用了A，它的引用计数器+1，引用失效-1。引用计数器变成0的时候，不能再使用
+- 标记-清除算法（Mark-Sweep）。标记阶段通过根节点标记可达对象。未被标记则是垃圾对象。容易造成内存碎片化
+- 复制算法。内存分为两块，一半放数据，另一半不放。GC时将正在使用的内存的存活对象拷贝到未使用的内存块，清楚原来的所有对象。有内存浪费
+- 标记-压缩。先标记对象，把不可回收的对象放到已回收的对象的位置。没有内存浪费
+
+### 老生代和新生代？
+
+- 新生代分为eden、survivor1、survivor2。new的对象非常大则放入老生代，否则放入edan，GC一次后仍有引用，放入survivor1，再经历一次放入survivor2.一定次数后放入老生代。
+
+## Java缓存
+
+### LRU？
+
+Least Recent Used
+
+- 缓存思想：
+  - 缓存大小固定
+  - 每次读取会刷新缓存使用时间
+  - 缓存满后，删除最久未使用的缓存，再添加新缓存
+
+### FIFO？
+
+First In First Out
+
+
+
+### LFU？
+
+
 
 ## Redis
 
+### 缓存击穿？避免？
 
+- 某热点key在失效时，刚好有大量并发请求
+- 避免：
+  - 使用互斥锁。缓存失效时，先用SETNX设置mutex key。返回成功后再load db并回设缓存
+  - 提前使用互斥锁。在value内部设置1个超时值(timeout1), timeout1比实际的memcache timeout(timeout2)小。当从cache读取到timeout1发现它已经过期时候，马上延长timeout1并重新设置到cache。然后再从数据库加载数据并设置到cache中。
+  - 永远不过期。发现要过期时，通过后台的异步线程进行缓存的构建
+
+### 缓存穿透？避免？
+
+- 恶意请求故意查询不存在的key，系统会去后端系统查找，造成很大压力
+- 避免：
+  - 对查询结果为空的情况也进行缓存，期限设置短一些，key对应数据insert后清理缓存
+  - 对肯定不存在的key过滤，可以通过bitmap过滤。布隆过滤器
+
+### 缓存雪崩？避免？
+
+- 缓存服务器重启、崩溃、集体失效
+- 避免：
+  - 失效后，通过加锁或者队列控制查询和写缓存的线程数量
+  - 做二级缓存。原始缓存设为短期，拷贝缓存设为长期
+  - key的失效时间加上随机数，让失效时间尽量均匀
+
+## Spring
+
+### 事务管理？
+
+- 事务：
+  - 原子性。事务是最小的单位，不允许分割。
+  - 隔离性。执行完事务后，数据保持一致。
+  - 一致性。并发访问数据库时，一个用户的事务不被其他事务干扰，并发事务之间数据库是独立的。
+  - 持久性。事务提交后，在数据库中的数据改变应该是持久的，数据库故障也不应该影响。
+  
+- Spring事务管理API
+
+  事务管理就是按照给定的事务规则来执行提交和回滚操作
+
+  - `PlatformTransactionManager` 接口
+
+  ```java
+  // 与事务策略分离的接口
+  
+  public interface PlatformTransactionManager {
+  
+      // 平台无关的获得事务的方法
+    	// 根据一个TransactionDefinition参数，返回一个TransactionStatus对象，可能是已存在的事务对象，也可能是新的事务对象
+      TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException;
+  
+      // 平台无关的事务提交方法
+      void commit(TransactionStatus status) throws TransactionException;
+  
+      // 平台无关的事务回滚方法
+      void rollback(TransactionStatus status) throws TransactionException;
+  }
+  ```
+
+  - `TransactionDefinition` 接口
+
+  ```java
+  // 用于定义一个事务的规则
+  // 默认的实现类：DefaultTransactionDefinition
+  // 定义的事务规则：事务隔离级别、事务传播行为、事务超时、事务的只读属性、事务的回滚规则
+  
+  public interface TransactionDefinition{
+      int getIsolationLevel();
+      int getPropagationBehavior();
+      int getTimeout();
+      boolean isReadOnly();
+  }
+  
+  /**
+  事务隔离级别:
+  	TransactionDefinition.ISOLATION_DEFAULT：使用底层数据库默认隔离级别
+  	TransactionDefinition.ISOLATION_READ_UNCOMMITTED：读未提交。很少使用
+  	TransactionDefinition.ISOLATION_READ_COMMITTED：读提交。防止脏读
+  	TransactionDefinition.ISOLATION_REPEATABLE_READ：重复读。防止脏读和不可重复读
+  	TransactionDefinition.ISOLATION_SERIALIZABLE：串行化。严重影响性能
+  	
+  事务传播行为（解决业务层方法互相调用的问题）：
+  
+  事务超时属性
+  
+  事务只读属性
+  
+  回滚规则
+  */
+  ```
+
+  - `TransactionStatus` 接口
+
+  ```java
+  // 返回一个Transaction对象，代表一个新的或者已存在的事务
+  
+  public interface TransactionStatus{
+      boolean isNewTransaction(); // 是否是新的事物
+      boolean hasSavepoint(); // 是否有恢复点
+      void setRollbackOnly();  // 设置为只回滚
+      boolean isRollbackOnly(); // 是否为只回滚
+      boolean isCompleted; // 是否已完成
+  }
+  ```
+
+- 编程式事务管理（基于底层API）
+
+```java
+public class BankServiceImpl implements BankService {
+    private BankDao bankDao;
+    private TransactionDefinition txDefinition;
+    private PlatformTransactionManager txManager;
+    ......
+
+    public boolean transfer(Long fromId， Long toId， double amount) {
+        // 获取一个事务
+        TransactionStatus txStatus = txManager.getTransaction(txDefinition);
+        boolean result = false;
+        try {
+            result = bankDao.transfer(fromId， toId， amount);
+            txManager.commit(txStatus);    // 事务提交
+        } catch (Exception e) {
+            result = false;
+            txManager.rollback(txStatus);      // 事务回滚
+            System.out.println("Transfer Error!");
+        }
+        return result;
+    }
+}
+```
+
+相应配置文件
+
+```XML
+<bean id="bankService" class="footmark.spring.core.tx.programmatic.origin.BankServiceImpl">
+    <property name="bankDao" ref="bankDao"/>
+    <property name="txManager" ref="transactionManager"/>
+    <property name="txDefinition">
+    <bean class="org.springframework.transaction.support.DefaultTransactionDefinition">
+        <property name="propagationBehaviorName" value="PROPAGATION_REQUIRED"/>
+    </bean>
+    </property>
+</bean>
+```
+
+- 编程式事务管理（基于`TransactionTemplate`）
+
+```java
+public class BankServiceImpl implements BankService {
+    private BankDao bankDao;
+    private TransactionTemplate transactionTemplate;
+    ......
+    public boolean transfer(final Long fromId， final Long toId， final double amount) {
+        return (Boolean) transactionTemplate.execute(new TransactionCallback(){ // 匿名内部类
+            public Object doInTransaction(TransactionStatus status) {
+                Object result;
+                try {
+                        result = bankDao.transfer(fromId， toId， amount);
+                    } catch (Exception e) {
+                        status.setRollbackOnly(); // 执行事务回滚
+                        result = false;
+                        System.out.println("Transfer Error!");
+                }
+                return result;
+            }
+        });
+    }
+}
+```
+
+相应配置文件：
+
+```xml
+<bean id="bankService" class="footmark.spring.core.tx.programmatic.template.BankServiceImpl">
+    <property name="bankDao" ref="bankDao"/>
+    <property name="transactionTemplate" ref="transactionTemplate"/>
+</bean>
+```
+
+- Spring声明式事务管理
+
+建立在AOP机制上，本质是对目标方法前后进行拦截。在目标方法开始前创建或加入一个事务，执行完目标方法后根据执行情况提交或回滚事务。
+
+优点：只需在配置文件进行事务规则声明。
+
+## 数据库
+
+### 事务隔离级别？
+
+主要在多个事务并发的情况下。解决脏读、不可重复读、幻读等问题。
+
+- Read uncommitted 读未提交
+  - 脏读：事务B读取了事务A尚未提交的数据，即事务A还未结束就回滚的数据被事务B读到。
+- Read committed 读提交
+  - 不会出现脏读，但会出现不可重复读。
+  - 不可重复读：事务A读取数据后，事务B紧接更新了数据并提交事务，事务A再次读取的时候，数据已经被修改。
+  - SQL Server、Oracle默认级别
+- Repeatable read 重复读
+  - 避免不可重复读。一个事务中重复读取数据，不会发生变化，除非提交了数据，再次进行读取
+  - 幻读：事务A查询了数据，此时事务B新增一条数据。事务A继续新增这条数据时发现冲突，或者更新时影响的行数跟刚刚读取的不一致。
+- Serializable 串行化
+  - 最高的事务隔离级别。
+  - 事务顺序执行，避免脏读、不可重复读、幻读。
+  - 性能很低，很少使用。
 
 ## 未分类
 
 ### 消息队列？
 
 https://blog.csdn.net/songfeihu0810232/article/details/78648706
+
+### 布隆过滤器
+
+https://zhuanlan.zhihu.com/p/43263751
