@@ -17,7 +17,7 @@
 
 ## 剑指Offer
 
-[3.数组中的重复数字](https://github.com/EyreYoung/Notes/blob/master/剑指Offer/3.数组中的重复数字.md)
+[3.数组中重复的数字](https://github.com/EyreYoung/Notes/blob/master/剑指Offer/3.数组中重复的数字.md)
 
 [4.二维数组中的查找](https://github.com/EyreYoung/Notes/blob/master/剑指Offer/4.二维数组中的查找.md)
 

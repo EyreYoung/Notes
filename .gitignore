@@ -1,2 +1,5 @@
 Paper/.ipynb_checkpoints/CommunityGAN-checkpoint.md
 .DS_Store
+.configs/sorts.json
+.markdown/file_manager_status.config
+.markdown/folder_config.config
