@@ -13,7 +13,8 @@
 
 ## 比较Java和JavaScript？
 
-- Java来自Sun Mircosystems公司，是面向对象的程序设计语言。JavaScript来自Netscape公司，是基于对象和时间驱动的解释型语言
+Java来自Sun Mircosystems公司，是面向对象的程序设计语言。JavaScript来自Netscape公司，是基于对象和时间驱动的解释型语言
+
 - Java源代码执行前必须进行编译，JavaScript代码直接由浏览器解释执行
 - Java采用强类型变量检查，JavaScript使用弱类型变量，由解释器在运行时推断类型
 - 代码格式不一样
