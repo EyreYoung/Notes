@@ -44,7 +44,7 @@ protected：继承的类可以访问
 
 ### 1.6 多形对象的互换使用
 
-![类型继承](https://github.com/EyreYoung/Notes/blob/master/Book/img/1.6-1.png)
+![类型继承](img/1.6-1.png)
 ``` java
 void doStuff(Shape s){
     s.erase();

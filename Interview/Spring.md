@@ -1,6 +1,6 @@
 # Spring
 
-![Spring模块](/Users/eyreyoung/Desktop/Notes/Interview/img/Spring模块.png)
+![Spring模块](img/Spring模块.png)
 
 ## 事务管理？
 

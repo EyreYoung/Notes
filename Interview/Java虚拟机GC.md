@@ -4,7 +4,7 @@
 
 ### Java内存区域？
 
-![Java内存模型](/Users/eyreyoung/Desktop/Notes/Interview/img/Java内存模型.jpg)
+![Java内存模型](img/Java内存模型.jpg)
 
 ### 程序计数器 Program Counter Register ？
 
@@ -32,7 +32,7 @@
 - 作用是存放对象实例，几乎所有对象实例和数组都在这分配内存
 - 垃圾收集器管理的主要区域，也被称作GC堆
 
-![](/Users/eyreyoung/Desktop/Notes/Interview/img/Java堆分区.jpg)
+![](img/Java堆分区.jpg)
 
 - 分为新生代、老生代。新生代分为Eden空间、From Survivor空间、To Survivor空间。默认比例8：1：1。
 

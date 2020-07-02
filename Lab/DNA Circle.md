@@ -14,7 +14,7 @@
 
 
 
-<img src="/Users/eyreyoung/Desktop/Notes/Lab/img/DNA2.1.png" alt="Attachment.png" style="zoom: 50%;" />
+<img src="img/DNA2.1.png" alt="Attachment.png" style="zoom: 50%;" />
 
 #### 2.1. IBD匹配
 
@@ -80,7 +80,7 @@ IBD匹配的这种分组允许用户通过与特定组中每个亲戚的协作�
 1.在最近血统相同的个体和不同血统的人的血统之间鉴定的最近的共同祖先（MRCA）
 2.亲密的家庭团体。(家族树)
 
-<img src="/Users/eyreyoung/Desktop/Notes/Lab/img/DNA3.1.png"  />
+<img src="img/DNA3.1.png"  />
 
 #### 3.1. 打过分的最近共祖 Scored Most Recent Common Ancestors (MRCAs)
 
@@ -101,7 +101,7 @@ IBD匹配的这种分组允许用户通过与特定组中每个亲戚的协作�
 
 下面，我们描述了这些权重的推导和计分以及如何将其用于计算MRCA的分数。
 
-![](/Users/eyreyoung/Desktop/Notes/Lab/img/DNA3.2.png)
+![](img/DNA3.2.png)
 
 ##### 3.1.1 W(IBD)
 
@@ -229,7 +229,7 @@ DNA Circle的第二个基本组成部分是DNA Circle成员本身。 DNA圈的�
 
 首先，我们介绍加权图或网络的概念，它是可视化和表示DNA Circle的有用方法（请参见图4.1）。 成员（个人和家庭组；请参阅第3.2节）由节点表示，节点之间的加权边是MRCA的得分（e i↔j；请参阅第3.1节）。 使用此框架，我们讨论了如何创建DNA Circles以及如何计算其相关分数（见图4.2）。
 
-![](/Users/eyreyoung/Desktop/Notes/Lab/img/DNA4.1.png)
+![](img/DNA4.1.png)
 
 ![](/Users/eyreyoung/Desktop/Notes/Lab/img/DNA4.2.png)
 

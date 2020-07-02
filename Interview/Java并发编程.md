@@ -9,7 +9,7 @@
 - **Time_Waiting 超时等待状态**：不同于Waiting，可以在指定时间自行返回
 - **Terminated 终止状态**：线程执行完毕
 
-![](/Users/eyreyoung/Desktop/Notes/Interview/img/Java线程状态变化.png)
+![](img/Java线程状态变化.png)
 
 - 线程创建后处于**New 初始状态**，调用start()方法后开始运行，进入**Ready 就绪状态**
 - 就绪状态的线程获得CPU时间片后处于**Runnable 运行状态**
