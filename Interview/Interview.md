@@ -39,8 +39,7 @@
 - Java5引入自动装箱/拆箱机制，可以互相转换
 
 ### 如何输出某种编码的字符串？
-- `public String​(byte[] bytes,
-              Charset charset)`
+- `public String​(byte[] bytes, Charset charset)`
 
 ### `String`和`StringBuffer`的区别？
 - 都是`final`类，不能被继承
