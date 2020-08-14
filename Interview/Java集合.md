@@ -10,6 +10,8 @@
 
 ## HashMap？
 
+[HashMap? ConcurrentHashMap? 相信看完这篇没人能难住你！](https://crossoverjie.top/2018/07/23/java-senior/ConcurrentHashMap/)
+
 基于哈希表，实现Map接口的双列集合。数据结构是数组加列表。
 
 Key唯一；Value可以重复；允许`null`键`null`值

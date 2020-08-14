@@ -1,4 +1,36 @@
-# Java并发编程
+# Java并发
+
+## 进程和线程？
+
+### 进程
+
+- 进程是代码在数据集合上的一次运行活动
+- 系统进行资源分配和调度的基本单位
+
+### 线程
+
+- 进程中的一个实体，本身不会独立存在
+- 进程的一个执行路径，一个进程中至少有一个线程
+- 进程中多个线程共享进程的资源
+- CPU分配的基本单位
+
+### 进程与线程关系
+
+- Java中启动main函数就启动了一个JVM的进程，main函数所在的线程就是这个进程中的一个线程（主线程）
+- 一个进程中有多个线程，多个线程共享进程的堆和方法区资源
+- 每个线程有自己的栈区域和程序计数器
+- **本质区别**：**是否单独占有内存地址空间和其他系统资源**（比如IO）
+  - 进程单独占有一定的内存地址空间，所以进程间存在内存隔离，数据分开，数据共享复杂但是同步简单
+  - 线程共享所属进程的内存地址空间和资源，数据共享简单但是同步复杂
+  - 进程单独占有内存地址空间，一个进程出现问题不会影响其他进程，可靠性高
+  - 线程崩溃可能影响整个程序的稳定性，可靠性高
+  - 进程的创建和销毁要保存寄存器和栈信息，需要资源的分配回收和页调度，开销大
+  - 线程只需保存寄存器和栈信息，开销小
+  - **线程是操作系统进行资源分配的基本单位，线程是操作系统进行调度的基本单位（CPU分配时间）**
+
+### 为什么要使用多线程
+
+- 进程间通信比较复杂，线程间通信比较简单，共享资源在线程之间通信比较容易
 
 ## 线程的生命周期和状态？
 
@@ -17,6 +49,90 @@
 - **Time_Waiting 超时等待状态**可以通过 `sleep(long millis)` 或 `wait(long millis)` 方法进入，时间到达后线程会返回**Runnable状态**
 - 线程调用同步方法时，如果没有获取到锁，线程进入**Blocked 阻塞状态**
 - 线程执行 `Runnable` 的 `run()` 方法后会进入**Terminated 终止状态**
+
+## 创建线程方法？
+
+### 继承Thread类
+
+```java
+public class Demo {
+    public static class MyThread extends Thread {
+        @Override
+        public void run() {
+            System.out.println("MyThread");
+        }
+    }
+    
+    public static void main(String[] args) {
+        Thread thread = new MyThread();
+        thread.start();
+    }
+}
+```
+
+### 实现Runnable接口
+
+```java
+@FunctionalInterface
+public interface Runnable {
+    public abstract void run();
+}
+```
+
+示例：
+
+```java
+public class Demo {
+    public static class MyThread implements Runnable {
+        @override
+        public void run() {
+            System.out.println("My Thread");
+        }
+    }
+    
+    public static void main(String[] args) {
+        new Thread(new MyThread()).start();
+        
+        // Java8
+        new Thread(() -> {
+            System.out.println("Java8 匿名内部类");
+        }).start();
+    }
+}
+```
+
+### 实现Callable接口
+
+```java
+public class CallerTask implements Callable<String> {
+    @Override
+    public String call() throws Exception {
+        System.out.println("Thread.currentThread().getState() = " + Thread.currentThread().getState());
+        return "hello";
+    }
+
+    public static void main(String[] args) {
+        FutureTask<String> futureTask = new FutureTask<>(new CallerTask());
+        new Thread(futureTask).start();
+        try {
+            String result = futureTask.get();
+            System.out.println(result);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+### Thread和Runnable比较？
+
+- Thread只能单继承，Runnable可以多实现
+- Thread继承方便传参，可以在子类添加成员变量，通过set设置参数或构造函数传递
+- Runnable只能使用主线程中声明为final的变量
+
+## 线程间通信
+
+
 
 ##  上下文切换？
 
@@ -53,12 +169,6 @@
 
 - `new` 一个 `Thread`，线程进入初始状态，调用 `start()` 方法可以进入运行状态，`start()` 会执行线程的相应准备工作，自动执行 `run()` 方法的代码
 - 如果直接使用 `run()` 方法，相当于普通的方法调用，还是在 `main `线程下运行，并没有实现多线程
-
-## 线程使用？
-
-- 实现 `Runnable` 接口
-- 实现 `Callable` 接口
-- 继承 `Thread` 类
 
 ## 并发编程的特性？
 
