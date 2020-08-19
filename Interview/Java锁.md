@@ -2,6 +2,13 @@
 
 Java多线程的锁都是基于对象的，类锁也是特殊的对象锁，Java类只有一个Class对象，可以有多个实例对象共享这一个Class对象，类锁就是这个Class对象的锁
 
+## volatile
+
+[Java程序员面试必备：Volatile全方位解析](https://juejin.im/post/6859390417314512909)
+
+- 修饰符，只修饰变量
+- 最轻量级的同步机制
+
 ## synchronized
 
 ### 实现原理

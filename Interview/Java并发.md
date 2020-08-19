@@ -194,5 +194,27 @@ public class CallerTask implements Callable<String> {
 
 - `corePoolSize`：**核心线程数**。最小可以同时运行的线程数
 - `maximumPoolSize` ：**最大线程数**。队列中任务达到队列容量时，可同时运行的线程数量变为最大线程数
-- **`workQueue`**：
+- `keepAliveTime`：非核心线程空闲存活时间
+- `unit`：存活时间单位
+- **`workQueue`**：存放任务的阻塞队列
+- `threadFactory`：用于设置创建线程的工厂，比如设置线程名称
+- `handler`：线程池的饱和策略事件
 
+## 线程池执行流程？
+
+![线程池执行流程](https://user-gold-cdn.xitu.io/2019/7/7/16bca03a5a6fd78f?imageslim)
+
+## 线程池拒绝策略？
+
+- `AbortPolicy`：默认。抛出一个异常
+- `DiscardPolicy`：直接丢弃任务
+- `DiscardOldestPolicy`：丢弃队列里最老的任务，当前任务继续提交线程池
+- `CallerRunsPolicy`：交给线程池调用所在的线程处理
+
+## 线程池工作队列？
+
+- `ArrayBlockingQueue`：有界队列。数组实现的有界阻塞队列，FIFO
+- `LinkedBlockingQueue`：可设置容量队列。基于链表的阻塞队列，FIFO，容量可设置，不设置则为一个无边界的阻塞队列，最大长度`Integer.MAX_VALUE`，吞吐量高于ArrayBlockingQueue。`newFixedThreadPool`线程池
+- `DelayQueue`：延迟队列。任务定时周期地延迟执行的队列。根据指定的执行时间从小到大排序，否则根据插入顺序排列。`newScheduledThreadPool`线程池
+- `PriorityBlockingQueue`：优先级队列。具有优先级的无界阻塞队列
+- `SynchronousQueue`：同步队列。不存储元素的阻塞队列，每个插入操作都要等到另一个线程调用移除操作，否则阻塞。吞吐量高于LinkedBlockingQueue。`newCachedThreadPool`线程池
